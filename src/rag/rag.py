@@ -1,64 +1,59 @@
 import re
 import requests
 from typing import List, Tuple
-from rdflib import Graph, URIRef, Literal
+from rdflib import Graph, URIRef
 from pathlib import Path
 
-# ----------------------------
 # configuration
-# ----------------------------
-NT_FILE    = Path(r"C:\Users\rache\OneDrive - De Vinci\web datamining and semantics\td\lab1\expanded_kb.nt")
-OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL      = "gemma:2b"
+nt_file = Path(__file__).parent.parent.parent / "kg_artifacts" / "expanded_kb.nt"
+ollama_url = "http://localhost:11434/api/generate"
+model = "gemma:2b"
 
-CC_NS      = "http://climate-change.org/kg/"
-MAX_PREDICATES = 30
-MAX_CLASSES    = 15
-SAMPLE_TRIPLES = 20
+cc_ns = "http://climate-change.org/kg/"
+max_predicates = 30
+max_classes = 15
+sample_triples = 20
 
-# ----------------------------
-# 0) call local LLM via Ollama
-# ----------------------------
-def ask_local_llm(prompt: str) -> str:
-    payload = {"model": MODEL, "prompt": prompt, "stream": False}
-    response = requests.post(OLLAMA_URL, json=payload, timeout=180)
+
+# call local LLM via Ollama
+def ask_local_llm(prompt):
+    payload = {"model": model, "prompt": prompt, "stream": False}
+    response = requests.post(ollama_url, json=payload, timeout=180)
     if response.status_code != 200:
         raise RuntimeError(f"Ollama error {response.status_code}: {response.text}")
     return response.json().get("response", "")
 
-# ----------------------------
-# 1) load RDF graph
-# ----------------------------
-def load_graph(path: Path) -> Graph:
+
+# load RDF graph
+def load_graph(path):
     g = Graph()
     g.parse(str(path), format="nt")
     print(f"Graph loaded: {len(g)} triples from {path.name}")
     return g
 
-# ----------------------------
-# 2) build focused schema summary (CC namespace only)
-# ----------------------------
-def build_schema_summary(g: Graph) -> str:
-    RDF_TYPE   = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
 
-    cc_triples = [(s, p, o) for s, p, o in g if str(s).startswith(CC_NS)]
+# build schema summary from CC namespace only
+def build_schema_summary(g):
+    rdf_type = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
 
-    preds = sorted(set(str(p) for s, p, o in cc_triples))[:MAX_PREDICATES]
-    clss  = sorted(set(str(o) for s, p, o in cc_triples if str(p) == RDF_TYPE))[:MAX_CLASSES]
+    cc_triples = [(s, p, o) for s, p, o in g if str(s).startswith(cc_ns)]
+
+    preds = sorted(set(str(p) for s, p, o in cc_triples))[:max_predicates]
+    clss = sorted(set(str(o) for s, p, o in cc_triples if str(p) == rdf_type))[:max_classes]
     samples = [
         (str(s), str(p), str(o))
         for s, p, o in cc_triples
-        if isinstance(o, URIRef) and str(p) != RDF_TYPE
-    ][:SAMPLE_TRIPLES]
+        if isinstance(o, URIRef) and str(p) != rdf_type
+    ][:sample_triples]
     entities = sorted(set(str(s) for s, p, o in cc_triples))[:15]
 
-    pred_lines   = "\n".join(f"  <{p}>" for p in preds)
-    cls_lines    = "\n".join(f"  <{c}>" for c in clss)
+    pred_lines = "\n".join(f"  <{p}>" for p in preds)
+    cls_lines = "\n".join(f"  <{c}>" for c in clss)
     sample_lines = "\n".join(f"  <{s}> <{p}> <{o}> ." for s, p, o in samples)
     entity_lines = "\n".join(f"  <{e}>" for e in entities)
 
-    return f"""# Base namespace: {CC_NS}
-PREFIX cc: <{CC_NS}>
+    return f"""# Base namespace: {cc_ns}
+PREFIX cc: <{cc_ns}>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
@@ -76,9 +71,8 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
 {sample_lines}
 """.strip()
 
-# ----------------------------
-# 3) NL -> SPARQL with few-shot examples
-# ----------------------------
+
+# few-shot examples for NL to SPARQL
 FEW_SHOT = """
 EXAMPLE 1:
 Question: What organizations are in the graph?
@@ -121,7 +115,8 @@ Rules:
 - Return ONLY the SPARQL query in one ```sparql code block.
 - No text outside the code block."""
 
-def make_sparql_prompt(schema_summary: str, question: str) -> str:
+
+def make_sparql_prompt(schema_summary, question):
     return f"""{SPARQL_INSTRUCTIONS}
 
 SCHEMA SUMMARY:
@@ -134,26 +129,29 @@ QUESTION:
 
 Return only the SPARQL query in a ```sparql code block."""
 
-CODE_BLOCK_RE = re.compile(r"```(?:sparql)?\s*(.*?)```", re.IGNORECASE | re.DOTALL)
 
-def extract_sparql(text: str) -> str:
-    m = CODE_BLOCK_RE.search(text)
+code_block_re = re.compile(r"```(?:sparql)?\s*(.*?)```", re.IGNORECASE | re.DOTALL)
+
+
+def extract_sparql(text):
+    m = code_block_re.search(text)
     if m:
         return m.group(1).strip()
     return text.strip()
 
-def generate_sparql(question: str, schema_summary: str) -> str:
+
+def generate_sparql(question, schema_summary):
     raw = ask_local_llm(make_sparql_prompt(schema_summary, question))
     return extract_sparql(raw)
 
-# ----------------------------
-# 4) execute SPARQL + self-repair
-# ----------------------------
-def run_sparql(g: Graph, query: str) -> Tuple[List[str], List[Tuple]]:
-    res   = g.query(query)
+
+# execute SPARQL query against the graph
+def run_sparql(g, query):
+    res = g.query(query)
     vars_ = [str(v) for v in res.vars]
-    rows  = [tuple(str(cell) for cell in r) for r in res]
+    rows = [tuple(str(cell) for cell in r) for r in res]
     return vars_, rows
+
 
 REPAIR_INSTRUCTIONS = """The SPARQL query below failed. Fix it using the SCHEMA SUMMARY and ERROR MESSAGE.
 Rules:
@@ -161,7 +159,8 @@ Rules:
 - Keep the query simple.
 - Return ONLY the corrected SPARQL in one ```sparql code block."""
 
-def repair_sparql(schema_summary: str, question: str, bad_query: str, error_msg: str) -> str:
+
+def repair_sparql(schema_summary, question, bad_query, error_msg):
     prompt = f"""{REPAIR_INSTRUCTIONS}
 
 SCHEMA SUMMARY:
@@ -178,7 +177,8 @@ Return only the corrected SPARQL in a ```sparql code block."""
     raw = ask_local_llm(prompt)
     return extract_sparql(raw)
 
-def answer_with_rag(g: Graph, schema_summary: str, question: str, try_repair: bool = True) -> dict:
+
+def answer_with_rag(g, schema_summary, question, try_repair=True):
     sparql = generate_sparql(question, schema_summary)
     try:
         vars_, rows = run_sparql(g, sparql)
@@ -194,24 +194,22 @@ def answer_with_rag(g: Graph, schema_summary: str, question: str, try_repair: bo
                 return {"query": repaired, "vars": [], "rows": [], "repaired": True, "error": str(e2)}
         return {"query": sparql, "vars": [], "rows": [], "repaired": False, "error": err}
 
-# ----------------------------
-# 5) baseline: direct LLM without KG
-# ----------------------------
-def answer_no_rag(question: str) -> str:
+
+# direct LLM answer without the knowledge graph
+def answer_no_rag(question):
     prompt = f"Answer the following question briefly and factually:\n\n{question}"
     return ask_local_llm(prompt)
 
-# ----------------------------
-# 6) display result
-# ----------------------------
-def pretty_print(result: dict):
+
+# display RAG result
+def pretty_print(result):
     print("\n[SPARQL Query Used]")
     print(result["query"])
     print(f"\n[Repaired] {result['repaired']}")
     if result.get("error"):
         print(f"[Error] {result['error']}")
     vars_ = result.get("vars", [])
-    rows  = result.get("rows", [])
+    rows = result.get("rows", [])
     if not rows:
         print("[No results returned]")
         return
@@ -223,12 +221,11 @@ def pretty_print(result: dict):
     if len(rows) > 20:
         print(f"... (showing 20 of {len(rows)})")
 
-# ----------------------------
-# 7) CLI demo
-# ----------------------------
+
+# CLI demo
 if __name__ == "__main__":
     print("Loading graph...")
-    g = load_graph(NT_FILE)
+    g = load_graph(nt_file)
     print("Building schema summary...")
     schema = build_schema_summary(g)
     print("Schema summary built.")
