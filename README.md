@@ -22,11 +22,17 @@ ollama pull gemma:2b
 | SWRL + KGE | Run `notebooks/lab3.ipynb` |
 | RAG demo | `python src/rag/rag.py` |
 
+
+## Hardware
+
+CPU only, 8 GB RAM minimum.
+
+
 ## RAG Demo Example
 ```
 Question (or 'quit'): What organizations are in the graph?
 ```
 
-## Hardware
+## Screenshot
 
-CPU only, 8 GB RAM minimum.
+![RAG demo](reports/rag_screenshot.png)
