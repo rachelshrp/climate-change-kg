@@ -1,0 +1,11 @@
+trafilatura==2.0.0
+spacy==3.8.11
+pandas
+httpx
+rdflib
+SPARQLWrapper
+owlready2==0.50
+pykeen
+requests
+torch
+numpy

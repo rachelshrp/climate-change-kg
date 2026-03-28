@@ -1,0 +1,89 @@
+@prefix cc: <http://climate-change.org/kg/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix wd: <http://www.wikidata.org/entity/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cc:Al_Gore cc:confidenceScore "1.0"^^xsd:float ;
+    owl:sameAs wd:Q19673 .
+
+cc:Cambridge cc:confidenceScore "0.8"^^xsd:float ;
+    owl:sameAs wd:Q350 .
+
+cc:Cambridge_University_Press cc:confidenceScore "1.0"^^xsd:float ;
+    owl:sameAs wd:Q912350 .
+
+cc:Conference_of_the_Parties cc:confidenceScore "0.9"^^xsd:float ;
+    owl:sameAs wd:Q1761307 .
+
+cc:FEMA cc:confidenceScore "1.0"^^xsd:float ;
+    owl:sameAs wd:Q273296 .
+
+cc:IPCC cc:confidenceScore "1.0"^^xsd:float ;
+    owl:sameAs wd:Q42262 .
+
+cc:Intergovernmental_Panel_on_Climate_Change cc:confidenceScore "1.0"^^xsd:float ;
+    owl:sameAs wd:Q42262 .
+
+cc:NASA cc:confidenceScore "1.0"^^xsd:float ;
+    owl:sameAs wd:Q23548 .
+
+cc:NOAA cc:confidenceScore "1.0"^^xsd:float ;
+    owl:sameAs wd:Q48268 .
+
+cc:New_York cc:confidenceScore "0.9"^^xsd:float ;
+    owl:sameAs wd:Q60 .
+
+cc:Paris cc:confidenceScore "0.9"^^xsd:float ;
+    owl:sameAs wd:Q90 .
+
+cc:The_Intergovernmental_Panel_on_Climate_Change cc:confidenceScore "1.0"^^xsd:float ;
+    owl:sameAs wd:Q42262 .
+
+cc:The_UN_Intergovernmental_Panel_on_Climate_Change cc:confidenceScore "1.0"^^xsd:float ;
+    owl:sameAs wd:Q42262 .
+
+cc:UK cc:confidenceScore "0.9"^^xsd:float ;
+    owl:sameAs wd:Q145 .
+
+cc:UN cc:confidenceScore "0.9"^^xsd:float ;
+    owl:sameAs wd:Q1065 .
+
+cc:UNFCCC cc:confidenceScore "1.0"^^xsd:float ;
+    owl:sameAs wd:Q170322 .
+
+cc:US cc:confidenceScore "0.9"^^xsd:float ;
+    owl:sameAs wd:Q30 .
+
+cc:United_Kingdom cc:confidenceScore "1.0"^^xsd:float ;
+    owl:sameAs wd:Q145 .
+
+cc:United_Nations cc:confidenceScore "1.0"^^xsd:float ;
+    owl:sameAs wd:Q1065 .
+
+cc:United_Nations_Environment cc:confidenceScore "0.9"^^xsd:float ;
+    owl:sameAs wd:Q160463 .
+
+cc:United_Nations_Framework_Convention_on_Climate_Change cc:confidenceScore "1.0"^^xsd:float ;
+    owl:sameAs wd:Q170322 .
+
+cc:United_States cc:confidenceScore "1.0"^^xsd:float ;
+    owl:sameAs wd:Q30 .
+
+cc:WMO cc:confidenceScore "0.9"^^xsd:float ;
+    owl:sameAs wd:Q167691 .
+
+cc:the_Intergovernmental_Panel_on_Climate_Change cc:confidenceScore "1.0"^^xsd:float ;
+    owl:sameAs wd:Q42262 .
+
+cc:the_UN_Environment_Programme cc:confidenceScore "1.0"^^xsd:float ;
+    owl:sameAs wd:Q160463 .
+
+cc:the_US_Global_Change_Research_Program cc:confidenceScore "1.0"^^xsd:float ;
+    owl:sameAs wd:Q7887823 .
+
+cc:the_United_States cc:confidenceScore "0.9"^^xsd:float ;
+    owl:sameAs wd:Q30 .
+
+cc:the_World_Meteorological_Organization cc:confidenceScore "1.0"^^xsd:float ;
+    owl:sameAs wd:Q167691 .
+
