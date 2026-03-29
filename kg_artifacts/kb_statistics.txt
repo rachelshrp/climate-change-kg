@@ -1,13 +1,13 @@
 KB Statistics
 =============
 
-Total triples:       70570
+Total triples: 70570
 Entities (subjects): 839
-Distinct relations:  4205
+Distinct relations: 4205
 
 Sources
 -------
-Initial graph (from crawler + NER):                      climate_kg.ttl
-Ontology:                                                 ontology.ttl
-Alignment (28 entities, Wikidata):                        alignment.ttl
-Expanded KB (1-hop + 2-hop + thematic + neighbor):        expanded_kb.nt
+Initial graph (from crawler + NER):climate_kg.ttl
+Ontology: ontology.ttl
+Alignment (28 entities, Wikidata): alignment.ttl
+Expanded KB (1-hop + 2-hop + thematic + neighbor):expanded_kb.nt
